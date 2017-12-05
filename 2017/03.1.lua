@@ -1,9 +1,9 @@
 print((function ()
-  n = io.read("n")
+  local n = io.read("n")
   if n == 1 then 
     return 0
   else
-    m = math.floor((math.sqrt(n)-1) / 2)*2 + 1
+    local m = math.floor((math.sqrt(n)-1) / 2)*2 + 1
     if n == m*m then
       return m-1
     end

@@ -1,5 +1,10 @@
 local ret = 0
-function sort(s) local t = {s:byte(1,-1)} table.sort(t) return string.char(table.unpack(t)) end
+local function sort(s)
+  local t = {s:byte(1,-1)}
+  table.sort(t)
+  return string.char(table.unpack(t))
+end
+
 for l in io.lines() do
   local s = {}
   for w in l:gmatch("%w+") do
