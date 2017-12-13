@@ -1,5 +1,5 @@
-print((function ()
-  local n = io.read("n")
+local input = io.read("n")
+local function steps(n)
   if n == 1 then 
     return 0
   else
@@ -16,4 +16,5 @@ print((function ()
     end
     return n
   end
-end)())
+end
+print(steps(n))
