@@ -13,26 +13,16 @@ for c,a in input:gmatch('([sxp])([%w/]+)') do
   elseif c == 'p' then
     local v1, _, v2 = a:byte(1,3)
     v1, v2 = v1-96,v2-96
-    for k,v in ipairs(tg) do
-      if v == v1 then
-        v1 = k
-        break
-      end
-    end
-    for k,v in ipairs(tg) do
-      if v == v2 then
-        v2 = k
-        break
-      end
-    end
-
     tg[v1], tg[v2] = tg[v2], tg[v1]
   end
 end
+local t = {}
+for i,v in ipairs(tg) do
+ t[v] = i
+end
+tg = t
 local p = {}
 for i=1,16 do
   p[i] = tg[td[i]]+96
 end
-print(table.unpack(td))
-print(table.unpack(tg))
 print(string.char(table.unpack(p)))
