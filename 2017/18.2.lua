@@ -24,11 +24,6 @@ end
 
 local function run_until_rcv(pos, reg, buff, value) 
   if pos > #input then return pos,0 end
-  local cmd, arg1, arg2 = table.unpack(input[pos])
-  if cmd == 'rcv' and value then
-    reg[arg1] = value
-    pos = pos + 1
-  end
 
   local nsnd = 0
   while pos <= #input do
@@ -37,7 +32,12 @@ local function run_until_rcv(pos, reg, buff, value)
       buff[#buff+1] = reg[arg1]
       nsnd = nsnd + 1
     elseif cmd == 'rcv' then
-      break
+      if value then
+        reg[arg1] = value
+        value = nil
+      else
+        break
+      end
     elseif cmd == 'set' then
       reg[arg1] = reg[arg2]
     elseif cmd == 'add' then
@@ -67,11 +67,10 @@ end
 regs[1]['p'] = 0
 regs[2]['p'] = 1
 
-
 local did_smth = true
 while did_smth do
   did_smth = false
-  for i=2,1,-1 do
+  for i=1,2 do
     local value
     if #buff[3-i] > 0 then value = table.remove(buff[3-i],1) end
     local p, n = run_until_rcv(pos[i], regs[i], buff[i], value)
