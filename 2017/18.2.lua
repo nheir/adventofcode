@@ -21,15 +21,7 @@ for l in io.lines() do
   end
   input[#input+1] = { cmd, arg, arg2 }
 end
-local regs = { reg, {} }
-for k,v in pairs(reg) do
-  regs[2][k] = v
-end
-regs[1]['p'] = 0
-regs[2]['p'] = 1
-local pos = { 1, 1 }
-local nsnd = { 0, 0 }
-local buff = { {}, {} }
+
 local function run_until_rcv(pos, reg, buff, value) 
   if pos > #input then return pos,0 end
   local cmd, arg1, arg2 = table.unpack(input[pos])
@@ -37,6 +29,7 @@ local function run_until_rcv(pos, reg, buff, value)
     reg[arg1] = value
     pos = pos + 1
   end
+
   local nsnd = 0
   while pos <= #input do
     local cmd, arg1, arg2 = table.unpack(input[pos])
@@ -60,8 +53,21 @@ local function run_until_rcv(pos, reg, buff, value)
     end
     pos = pos + 1
   end
+
   return pos, nsnd
 end
+
+local pos = { 1, 1 }
+local nsnd = { 0, 0 }
+local buff = { {}, {} }
+local regs = { reg, {} }
+for k,v in pairs(reg) do
+  regs[2][k] = v
+end
+regs[1]['p'] = 0
+regs[2]['p'] = 1
+
+
 local did_smth = true
 while did_smth do
   did_smth = false
