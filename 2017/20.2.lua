@@ -7,6 +7,7 @@ for l in io.lines() do
   end
   input[#input+1] = p
 end
+
 local function collide(p1,p2)
   local ks
   for i=1,3 do
@@ -14,14 +15,17 @@ local function collide(p1,p2)
     local a = (p1[i+6] - p2[i+6]) / 2
     local b = p1[i+3] - p2[i+3] + a
     local c = p1[i+0] - p2[i+0]
+    
     if a == 0 and b == 0 and c ~= 0 then
       return false
+    
     elseif a == 0 and b ~= 0 then
       local v = -c/b
       ksl = {}
       if v >= 0 and math.floor(v) == v then
         ksl = { v }
       end
+    
     elseif a ~= 0 then
       ksl = {}
       local d = b*b-4*a*c
@@ -35,6 +39,7 @@ local function collide(p1,p2)
 	ksl[#ksl+1] = k2
       end
     end
+    
     if not ks then
       ks = ksl
     elseif ksl then
@@ -51,6 +56,7 @@ local function collide(p1,p2)
       end
     end  
   end
+  
   local v
   for k in pairs(ks or {}) do
     if not v or v > k then
@@ -59,6 +65,7 @@ local function collide(p1,p2)
   end
   return v or 0 
 end
+
 local collisions = {}
 local max_time = 0
 for i=1,#input do
@@ -71,6 +78,7 @@ for i=1,#input do
     end
   end
 end
+
 local deleted = {}
 for i=0,max_time do
   local colls = {}
@@ -85,6 +93,7 @@ for i=0,max_time do
     deleted[c[2]] = true
   end
 end
+
 local count = 0
 for k in pairs(deleted) do
  count = count + 1
