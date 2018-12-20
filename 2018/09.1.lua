@@ -1,0 +1,38 @@
+local function max_t(t)
+	local max_v, max_i
+	for i,v in pairs(t) do
+		if max_i == nil or max_v < v then
+			max_i = i
+			max_v = v
+		end
+	end
+	return max_i, max_v
+end 
+
+local function f(m,n)
+	local score = {}
+	for i=0,m-1 do
+		score[i] = 0
+	end
+	local cycle = {0,2,1}
+	local current = 2
+	for i=3,n do
+		if i % 23 == 0 then
+			current = (current-8) % #cycle + 1
+			score[i%m] = score[i%m] + i + cycle[current]
+			table.remove(cycle,current)
+		else
+			current = current % #cycle + 2
+			table.insert(cycle,current,i)
+		end
+	end
+
+	return select(2,max_t(score))
+	
+end
+
+
+local m,n = io.read('a'):match('(%d+) players; last marble is worth (%d+) points')
+m = tonumber(m)
+n = tonumber(n)
+print(f(m,n))
