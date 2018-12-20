@@ -14,16 +14,25 @@ local function f(m,n)
 	for i=0,m-1 do
 		score[i] = 0
 	end
-	local cycle = {0,2,1}
+	local cycle_next = {[0]=2,0,1}
+	local cycle_prev = {[0]=1,2,0}
 	local current = 2
 	for i=3,n do
 		if i % 23 == 0 then
-			current = (current-8) % #cycle + 1
-			score[i%m] = score[i%m] + i + cycle[current]
-			table.remove(cycle,current)
+			for _=1,7 do
+				current = cycle_prev[current]
+			end
+			score[i%m] = score[i%m] + i + current
+			cycle_prev[cycle_next[current]] = cycle_prev[current]
+			cycle_next[cycle_prev[current]] = cycle_next[current]
+			current = cycle_next[current]
 		else
-			current = current % #cycle + 2
-			table.insert(cycle,current,i)
+			current = cycle_next[current]
+			cycle_next[i] = cycle_next[current]
+			cycle_prev[i] = current
+			cycle_prev[cycle_next[i]] = i
+			cycle_next[cycle_prev[i]] = i
+			current = i
 		end
 	end
 
