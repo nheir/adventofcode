@@ -1,0 +1,21 @@
+#ip 5
+r3 = 123
+
+do 
+	r3 = r3 & 456
+while r3 != 72
+
+r3 = 0
+do: 
+	r1 = r3 | 65536
+	r3 = 9450265 // key0
+	while true: 
+		r4 = r1 & 255
+		r3 = r3 + r4
+		r3 = r3 & 16777215 // 24 weak bits
+		r3 = r3 * 65899 // key1 = 256^2 + 256 + 107
+		r3 = r3 & 16777215 // 24 weak bits
+		if 256 > r1
+			break
+		r1 = r1 // 256
+while r3 != r0
