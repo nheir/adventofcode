@@ -3,7 +3,7 @@ local function f(n)
 
 	local t = {}
 	local max, max_x, max_y, max_size = -6
-	for x=1,300 do 
+	for x=1,300 do
 		t[x] = {}
 		for y=1,300 do
 			t[x][y] = ((((x+10)*y+n)*(x+10))%1000)//100-5

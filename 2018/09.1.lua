@@ -7,7 +7,7 @@ local function max_t(t)
 		end
 	end
 	return max_i, max_v
-end 
+end
 
 local function f(m,n)
 	local score = {}

@@ -3,7 +3,7 @@ local function f(n)
 	-- = (xxy+20xy+xn+100y+10n%1000)//100-5
 
 	local t = {}
-	for x=1,300 do 
+	for x=1,300 do
 		t[x] = {}
 		for y=1,300 do
 			t[x][y] = ((((x+10)*y+n)*(x+10))%1000)//100-5

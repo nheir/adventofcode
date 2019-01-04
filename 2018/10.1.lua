@@ -6,7 +6,7 @@ local function box(t,date)
 		if p.y+date*p.vy < bottom then bottom = p.y+date*p.vy end
 		if p.y+date*p.vy > top then top = p.y+date*p.vy end
 	end
-	return left,bottom,right-left+1,top-bottom+1 
+	return left,bottom,right-left+1,top-bottom+1
 end
 
 local function box_size(x,y,w,h)

@@ -43,7 +43,7 @@ local spring_y = y_min - 1
 local propagate = {}
 
 local last_level = {}
-for x = x_min,x_max do 
+for x = x_min,x_max do
 	last_level[x] = { min = x, max = x, open=true, left = x, right = x }
 end
 propagate[y_max] = last_level

@@ -10,7 +10,7 @@ for l in io.lines() do
 	i = i+1
 end
 
-local function rule(x,y,ground) 
+local function rule(x,y,ground)
 	local c = {0,0,0}
 	for i=-1,1 do
 		if ground[x+i] then

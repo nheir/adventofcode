@@ -63,7 +63,7 @@ local l = io.read('l')
 M.ip = tonumber(l:match('(%d)'))
 local instructions = {}
 l = io.read('l')
-repeat 
+repeat
 	local inst = parse_line(l)
 	if #inst == 4 then
 		table.insert(instructions, inst)

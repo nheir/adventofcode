@@ -40,7 +40,7 @@ local function short(underground, source, targets)
 	return false
 end
 
-local function comp(a,b) 
+local function comp(a,b)
 	return a.x < b.x or (a.x == b.x and a.y < b.y)
 end
 

@@ -10,7 +10,7 @@ local rules = {}
 local instructions = {}
 
 local l = io.read('l')
-repeat 
+repeat
 	if l:find('Before') then
 		local before = parse_line(l)
 		local inst = parse_line(io.read('l'))

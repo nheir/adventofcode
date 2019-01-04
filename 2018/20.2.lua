@@ -84,7 +84,7 @@ local function build_graph(pos,r)
 		local tmp = {}
 		for i=1,#r do
 			for _,p in ipairs(build_graph(pos,r[i])) do
-				tmp[tuple(table.unpack(p))] = p 
+				tmp[tuple(table.unpack(p))] = p
 			end
 		end
 		for _,p in pairs(tmp) do
