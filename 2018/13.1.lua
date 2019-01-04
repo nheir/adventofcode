@@ -7,28 +7,9 @@ local dir = {
 	[O] = function (x,y) return x-1,y end,
 }
 
-local function print_graph(graph,lutins,w,h)
-	local t = {}
-	for j=0,h-1 do
-		local s = {}
-		for i=0,w-1 do
-			s[i+1] = graph[j][i] or ' '
-		end
-		t[j+1] = s
-	end
-	for _,v in pairs(lutins) do
-		t[v.y+1][v.x+1] = string.format('%d',v.d)
-	end
-	for i,v in ipairs(t) do
-		t[i] = table.concat(v)
-		print(t[i])
-	end
-	--print(table.concat(t, '\n'))
-end
-
 local function move(v,pos,graph)
 	local x,y = dir[v.d](v.x,v.y)
-	if pos[y][x] then 
+	if pos[y][x] then
 		return false,x,y
 	end
 	pos[v.y][v.x] = nil

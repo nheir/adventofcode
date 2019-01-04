@@ -68,7 +68,7 @@ local l = io.read('l')
 M.ip = tonumber(l:match('(%d)'))
 local instructions = {}
 l = io.read('l')
-repeat 
+repeat
 	local inst = parse_line(l)
 	if #inst == 4 then
 		table.insert(instructions, inst)
@@ -78,7 +78,6 @@ until not l
 
 while instructions[M.reg[M.ip]+1] do
 	local op,a,b,c = table.unpack(instructions[M.reg[M.ip]+1])
-	-- print(op,a,b,c)
 	M[op](a,b,c)
 	M.reg[M.ip] = M.reg[M.ip] + 1
 end

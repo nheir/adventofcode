@@ -1,10 +1,3 @@
-local function print_state(state,m,M)
-	local t = {}
-	for i=m,M do
-		t[i-m+1] = (state[i] == 1) and '#' or '.'
-	end
-	print(table.concat(t))
-end
 local function f(init,rules)
 	local m,M = 0,#init
 	for _=1,20 do

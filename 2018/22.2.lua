@@ -68,11 +68,6 @@ function graph.adj(x,y,o)
 	return adj
 end
 
-function h(x,y)
-	return math.abs(x-tx) + math.abs(y-ty)
-end
-
-
 local Heap = {}
 Heap.__index = Heap
 function Heap.new()
@@ -121,6 +116,10 @@ function Heap:flush()
 	Heap[self] = {}
 end
 
+local function h(x,y)
+	return math.abs(x-tx) + math.abs(y-ty)
+end
+
 local visited = {}
 local father = {}
 local heap = Heap.new()
@@ -131,7 +130,6 @@ while not heap:empty() do
 	local item = heap:pop()
 
 	if not visited[item.v] then
-		--print(item.v.x, item.v.y, item.cost)
 		visited[item.v] = item.cost
 		father[item.v] = item.prev
 
@@ -141,11 +139,10 @@ while not heap:empty() do
 
 		for _,v in ipairs(graph.adj(item.v.x, item.v.y, item.v.o)) do
 			if not visited[v.v] then
-				heap:add({ prev=item.v, v=v.v, cost = item.cost + v.cost }, item.cost + v.cost + h(v.v.x,v.v.y))
+				heap:add({ prev=item.v, v=v.v, cost = item.cost + v.cost }, item.cost + v.cost + h(v.v.x, v.v.y))
 			end
 		end
 	end
 end
-
 
 print(visited[target])
