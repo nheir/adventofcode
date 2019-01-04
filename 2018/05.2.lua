@@ -1,15 +1,30 @@
 function g(t)
+  local next = {}
+  local prev = {}
+  for i=0,#t do
+    next[i] = i+1
+    prev[i] = i-1
+  end
+  local size = #t
+  local count = 0
   local i = 1
-  while i < #t do
-  	if t[i] == t[i+1]~32 then
-  		table.remove(t,i+1)
-  		table.remove(t,i)
-  		i = i-1
+  while i < size and next[i] <= size do
+  	if t[i] == t[next[i]]~32 then
+      next[prev[i]] = next[next[i]]
+      prev[next[next[i]]] = prev[i]
+  		i = prev[i]
+      count = count + 2
   	else
-  		i = i+1
+  		i = next[i]
   	end
   end
-  return t
+  local ret = {}
+  i = 0
+  while i <= size do
+  	table.insert(ret,t[i])
+  	i = next[i]
+  end
+  return ret
 end
 
 function remove(t,i)
@@ -25,9 +40,9 @@ end
 function f(s)
   local t = {string.byte(s,1,-1)}
 	t = g(t)
-	local min = #(g(remove(t,0x41)))
+	local min = #g(remove(t,0x41))
 	for i=0x42,0x5a do
-		local v = #(g(remove(t,i)))
+		local v = #g(remove(t,i))
 		if v < min then
 			min = v
 		end
