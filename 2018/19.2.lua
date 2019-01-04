@@ -91,4 +91,4 @@ while m > 1 do
 	end
 end
 res = res*(i^((count[i] or 0)+1) - 1) // (i-1)
-print(res)
+print(math.tointeger(res))

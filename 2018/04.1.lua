@@ -48,7 +48,7 @@ function f(t)
     end
   end
 
-  return max_id*j
+  return math.tointeger(max_id*j)
 end
 
 local t = {}
