@@ -47,6 +47,7 @@ local function f(t)
 	for _,v in pairs(t) do
 		content[v.y+d*v.vy-y+1][v.x+d*v.vx-x+1] = '#'
 	end
+	print()
 	for j=1,h do
 		print(table.concat(content[j]))
 	end

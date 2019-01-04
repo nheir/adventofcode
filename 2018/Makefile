@@ -1,4 +1,4 @@
-SRCS = $(wildcard *.in)
+SRCS = $(sort $(wildcard *.in))
 TEST = $(SRCS:.in=.out)
 
 all : $(TEST)
