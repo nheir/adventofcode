@@ -30,12 +30,3 @@ for x=0,tx do
 	end
 end
 print(count)
-
-local tab = {[0] = '.', '=', '|'}
-
-for y=0,ty do
-	for x=0,tx do
-		io.write(tab[typ(x,y)])
-	end
-	io.write('\n')
-end

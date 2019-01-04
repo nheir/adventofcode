@@ -68,36 +68,70 @@ function graph.adj(x,y,o)
 	return adj
 end
 
-function comp(a,b)
-	return a.cost + a.h < b.cost + b.h
-end
-
 function h(x,y)
 	return math.abs(x-tx) + math.abs(y-ty)
 end
 
+
+local Heap = {}
+Heap.__index = Heap
+function Heap.new()
+	local t = setmetatable({}, Heap)
+	Heap[t] = {}
+	return t
+end
+
+function Heap:add(item, v)
+	local self = Heap[self]
+	local pos = #self+1
+	local prev = pos // 2
+	while prev > 0 and self[prev].prior > v do
+		self[pos], pos, prev = self[prev], prev, prev // 2
+	end
+	self[pos] = { item=item, prior=v }
+end
+
+function Heap:pop()
+	local self = Heap[self]
+	local item = self[1].item
+	self[1] = self[#self]
+	self[#self] = nil
+	local i = 1
+	while true do
+		local j = i
+		if self[2*i] and self[2*i].prior < self[j].prior then
+			j = 2*i
+		end
+		if self[2*i+1] and self[2*i+1].prior < self[j].prior then
+			j = 2*i+1
+		end
+		if i == j then break end
+		self[i], self[j] = self[j], self[i]
+		i = j
+	end
+	return item
+end
+
+function Heap:empty()
+	local self = Heap[self]
+	return #self == 0
+end
+
+function Heap:flush()
+	Heap[self] = {}
+end
+
 local visited = {}
 local father = {}
-local queue = {}
+local heap = Heap.new()
 local target = graph.get(tx,ty,0)
-table.insert(queue, {v=graph.get(0,0,0), cost=0, h=h(0,0)})
-local x,y = 0,0
-while #queue > 0 do
-	local item = queue[1]
-	table.remove(queue,1)
-
-	if item.v.x > x then
-		x = item.v.x
-		print(x, item.v.y, item.cost, item.h)
-	end
-	if item.v.y > y then
-		y = item.v.y
-		print(item.v.x, y, item.cost, item.h)
-	end
-
+heap:add({ v=graph.get(0,0,0), cost=0 },0)
+local x,y = -1,-1
+while not heap:empty() do
+	local item = heap:pop()
 
 	if not visited[item.v] then
-		--print(item.v.x,item.v.y,item.cost)
+		--print(item.v.x, item.v.y, item.cost)
 		visited[item.v] = item.cost
 		father[item.v] = item.prev
 
@@ -107,33 +141,11 @@ while #queue > 0 do
 
 		for _,v in ipairs(graph.adj(item.v.x, item.v.y, item.v.o)) do
 			if not visited[v.v] then
-				table.insert(queue, { prev=item.v, v=v.v, cost = item.cost + v.cost, h=h(v.v.x,v.v.y)})
+				heap:add({ prev=item.v, v=v.v, cost = item.cost + v.cost }, item.cost + v.cost + h(v.v.x,v.v.y))
 			end
 		end
-		table.sort(queue, comp)
 	end
 end
 
 
 print(visited[target])
--- local cost = 0
--- while target do
--- 	print(target.x, target.y, typ(target.x, target.y), target.o)
--- 	assert(typ(target.x, target.y) == target.o or (typ(target.x, target.y)+1) % 3 == target.o)
--- 	if father[target] then
--- 		local prev = father[target]
--- 		if target.x == prev.x and target.y == prev.y and target.o ~= prev.o then
--- 			cost = cost + 7
--- 		elseif math.abs(target.x - prev.x) == 1 and target.y == prev.y and target.o == prev.o then
--- 			cost = cost + 1
--- 		elseif target.x == prev.x and math.abs(target.y - prev.y) == 1 and target.o == prev.o then
--- 			cost = cost + 1
--- 		else
--- 			print(prev.x, prev.y, typ(prev.x, prev.y), prev.o)
--- 			assert(false)
--- 		end
--- 	end
--- 	target = father[target]
--- end
-
--- print(cost)
