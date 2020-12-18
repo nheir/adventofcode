@@ -1,107 +1,55 @@
-local function pushToken(tok, val)
-  --print(tok,string.format('%q',val))
-  coroutine.yield(tok, val)
-end
-
-local lexer = coroutine.create(function ()
-  local state = 0
-  local val = nil
-  repeat
-    local c = io.read(1)
-    if not c then
-      if state ~= 0 then
-        pushToken(state,val)
-      end
-    elseif c:match('%d') then
-      if state == 1 then
-        val = 10*val + tonumber(c)
-      else
-        if state ~= 0 then
-          pushToken(state,val)
-        end
-        state = 1
-        val = tonumber(c)
-      end
-    elseif c:match('[\n()+*]') then
-      if state ~= 0 then
-        pushToken(state,val)
-      end
-      pushToken(2,c)
-      state = 0
-    else -- if c in (' ','\r','\t') then
-      if state ~= 0 then
-        pushToken(state,val)
-      end
-      state = 0
+local function get_tokens(l)
+  local tokens = {}
+  local i = 1
+  while i <= #l do
+    if l:sub(i,i) == ' ' then
+      i = i + 1
+    elseif l:gmatch('^[()+*]',i) then
+      table.insert(tokens, l:sub(i,i))
+      i = i + 1
+    else -- number
+      local a,b,n = l:find('^(%d+)',i)
+      table.insert(tokens, tonumber(n))
+      i = b + 1
     end
-  until not c
-  pushToken(3, c)
-end)
-
-local function parse_error(msg)
-  print("error:", msg)
-  os.exit(1)
-end
-
-local function getToken()
-  local t, tok, val = coroutine.resume(lexer)
-  if false then parse_error(tok) end
-  return { id=tok, val=val }
-end
-
-local function isEnd()
-  return not io.read(0)
-end
-
--- start -> {expr \n}+ EOF
-local function parse_start()
-  local att = 0
-  repeat
-    local tree, next_lexem = parse_expr()
-    if next_lexem.id ~= 2 or next_lexem.val ~= '\n' then parse_error("newline expected") end
-    att = att + tree
-  until isEnd()
-  return att
-end
-
--- expr -> term {* term}
--- expr -> term
-function parse_expr()
-  local tree, next_lexem = parse_term()
-  while next_lexem.id == 2 and next_lexem.val == '*' do
-    local tree2
-    tree2, next_lexem = parse_term()
-    tree = tree * tree2
   end
-  return tree, next_lexem
+  return tokens
 end
 
--- term -> factor {+ factor}
--- term -> factor
-function parse_term()
-  local tree, next_lexem = parse_factor()
-  while next_lexem.id == 2 and next_lexem.val == '+' do
-    local tree2
-    tree2, next_lexem = parse_factor(stream)
-    tree = tree + tree2
+local parse_expr, parse_term, parse_factor
+-- expr: term {+ expr}
+function parse_expr(tokens, i)
+  local ret, i = parse_term(tokens, i)
+  if tokens[i] == '*' then
+    local ret_expr, i = parse_expr(tokens, i+1)
+    return ret*ret_expr, i
   end
-  return tree, next_lexem
+  return ret, i
 end
-
--- factor -> number
--- factor -> ( expr )
-function parse_factor()
-  local lexem = getToken()
-  if lexem.id == 1 then
-    return lexem.val, getToken()
-  elseif lexem.id == 2 and lexem.val == '(' then
-    local tree, next_lexem = parse_expr()
-    if next_lexem.id ~= 2 or next_lexem.val ~= ')' then
-      parse_error(') expected')
-    end
-    return tree, getToken()
+-- term: factor {+ term}
+function parse_term(tokens, i)
+  local ret, i = parse_factor(tokens, i)
+  if tokens[i] == '+' then
+    local ret_term, i = parse_term(tokens, i+1)
+    return ret+ret_term, i
   end
-  parse_error("number or ( expected")
+  return ret, i
+end
+-- factor: number
+-- factor: ( expr )
+function parse_factor(tokens, i)
+  if tokens[i] == '(' then
+    local ret, i = parse_expr(tokens, i+1)
+    return ret, i+1
+  else
+    return tokens[i], i+1
+  end
 end
 
-print(parse_start())
+local t = 0
+for l in io.lines() do
+  local ret = parse_expr(get_tokens(l),1)
+  t = t + ret
+end
+
+print(t)
