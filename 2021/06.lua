@@ -12,7 +12,15 @@ local function step(t)
 	t[6] = t[6]+z
 end
 
-for i=1,256 do
+for i=1,80 do
+	step(t)
+end
+
+local s = 0
+for i=0,8 do s = s + t[i] end
+print(s)
+
+for i=81,256 do
 	step(t)
 end
 

@@ -4,16 +4,16 @@ local val = {}
 local size = 0
 
 local n = 0
-for l in io.lines() do 
+for l in io.lines() do
 	local i = 1
 	for c in l:gmatch('[01]') do
 		t[i] = (t[i] or 0) + string.byte(c) - string.byte('0')
 		i = i + 1
 	end
-	if i > 2 then 
+	if i > 2 then
 		table.insert(val, tonumber(l, 2))
 		size = i-1
-		n = n + 1 
+		n = n + 1
 	end
 end
 
@@ -30,7 +30,6 @@ for i,v in ipairs(t) do
 	end
 end
 
-print(n, gamma, epsilon)
 print(gamma*epsilon)
 
 table.sort(val)
@@ -60,6 +59,4 @@ for i=size,0,-1 do
 	end
 end
 
-print(ci, cj, val[ci])
-	
 print(val[ci]*val[li])

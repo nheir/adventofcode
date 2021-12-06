@@ -3,7 +3,7 @@ local t = {}
 local x = 0
 local y = 0
 local aim = 0
-for l in io.lines() do 
+for l in io.lines() do
 	local cmd, v = l:match('(%S+) (%d+)')
 	if cmd == 'forward' then
 		x = x + tonumber(v)
@@ -17,4 +17,5 @@ for l in io.lines() do
 	end
 end
 
+print(x*aim)
 print(x*y)

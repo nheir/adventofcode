@@ -1,3 +1,4 @@
+local part = 2
 local seq = {}
 
 local cards = {}
@@ -43,20 +44,24 @@ local function bingo_col(t,i)
 end
 
 local set = {}
+local remain = #cards
 
 local function found(card,v)
 	if set[card] then return end
 	set[card] = true
 	local sum = 0
 	for i=1,5 do
-		io.write(string.format('%q,%q,%q,%q,%q\n', table.unpack(card[i])))
 		for j=1,5 do
 			if card[i][j] ~= 'X' then
 				sum = sum + card[i][j]
 			end
 		end
 	end
-	print(sum*v)
+	remain = remain - 1
+	if part == 1 or remain == 0 then
+		print(sum*v)
+		os.exit(0)
+	end
 end
 
 for _,d in ipairs(seq) do
