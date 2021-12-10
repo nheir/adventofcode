@@ -1,3 +1,5 @@
+local timer = (require "timer")()
+
 local t = {}
 
 local score = {

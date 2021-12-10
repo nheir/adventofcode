@@ -1,3 +1,4 @@
+local timer = (require "timer")()
 local t = {}
 
 for l in io.lines() do
@@ -5,6 +6,7 @@ for l in io.lines() do
 	for d in l:gmatch('%d') do r[#r+1] = tonumber(d) end
 	if #r > 0 then t[#t+1] = r end
 end
+timer:log('Read')
 
 local m = {}
 for i,r in ipairs(t) do
@@ -27,6 +29,7 @@ for _,ij in pairs(m) do
 	end
 end
 print(ret)
+timer:log('Low')
 
 local function flood(i,j,marked)
 	if marked[(i<<10)|j] then return 0 end
@@ -56,3 +59,4 @@ end
 table.sort(ret)
 
 print(ret[#ret]*ret[#ret-1]*ret[#ret-2])
+timer:log('Pool')
