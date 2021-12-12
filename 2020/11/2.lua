@@ -15,17 +15,8 @@ for i=1,w do
 	end
 end
 
-local step = 1
 local change = true
 while change do
-	-- for i=1,w do
-	-- 	for j=1,h do
-	-- 		io.write(grid[i][j] or ' ')
-	-- 	end
-	-- 	io.write('\n')
-	-- end
-	-- print("step", step)
-	-- step = step + 1
 	change = false
 	local nextgrid = {}
 	for i=1,w do

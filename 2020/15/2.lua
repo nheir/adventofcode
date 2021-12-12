@@ -1,6 +1,5 @@
 local t = {}
 local nt = {}
-local seq = {}
 
 local i = 1
 local last
