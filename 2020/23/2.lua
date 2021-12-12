@@ -18,10 +18,11 @@ function move(v)
 	local a = suivant[v]
 	local b = suivant[a]
 	local c = suivant[b]
-	local t = {[a]=true,[b]=true,[c]=true}
-	local dest = (v-2)%N+1
-	while t[dest] do
-		dest = (dest-2)%N+1
+	local dest = v-1
+	if dest == 0 then dest = N end
+	while dest == a or dest == b or dest == c do
+		dest = dest-1
+		if dest == 0 then dest = N end
 	end
 	suivant[v] = suivant[c]
 	suivant[c] = suivant[dest]
