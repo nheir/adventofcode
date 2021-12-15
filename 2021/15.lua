@@ -22,15 +22,36 @@ h = #t
 timer:log('Read')
 
 local function insert(t, v, ij)
-	local k = #t
-	while k > 0 and t[k].v < v do k = k - 1 end
-	table.insert(t, k+1, { v=v, k=ij })
+	local k = #t+1
+	while k > 1 and t[k>>1].v > v do
+		t[k] = t[k>>1]
+		k = k >> 1
+	end
+	t[k] = { v=v, k=ij }
 end
+
+local function pop(t)
+	local ret = t[1]
+	local v = table.remove(t)
+	local i = 1
+	while t[2*i] do
+		local m = i
+		t[i] = v
+		if t[2*i].v < t[m].v then m = 2*i end
+		if t[2*i+1] and t[2*i+1].v < t[m].v then m = 2*i+1 end
+		if m == i then break end
+		t[i] = t[m]
+		i = m
+	end
+	t[i] = v
+	return ret
+end
+
 
 local q = {{v=0,k=key(1,1)}}
 local r = {}
 while q[1] do
-	local p = table.remove(q)
+	local p = pop(q)
 	if not r[p.k] then
 		r[p.k] = p.v
 		if p.k == key(h,w) then break end
@@ -51,7 +72,7 @@ print(r[key(h,w)])
 local q = {{v=0,k=key(1,1)}}
 local r = {}
 while q[1] do
-	local p = table.remove(q)
+	local p = pop(q)
 	if not r[p.k] then
 		r[p.k] = p.v
 		if p.k == key(5*h,5*w) then break end
