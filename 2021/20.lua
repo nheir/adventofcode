@@ -1,3 +1,5 @@
+local timer = (require "timer")()
+
 local function bin(a)
 	local t = {}
 	for c in a:gmatch('.') do
@@ -46,6 +48,7 @@ for _,v in ipairs(step(step(pic,0),doAlt and 1 or 0)) do
 		count = count + k
 	end
 end
+timer:log("Two steps")
 print(count)
 
 local result = pic
@@ -54,6 +57,7 @@ for i=1,50 do
 	result = step(result, doAlt and alt or 0)
 	alt = 1 - alt
 end
+timer:log("50 steps")
 
 local count = 0
 for _,v in ipairs(result) do

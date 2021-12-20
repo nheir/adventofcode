@@ -1,3 +1,5 @@
+local timer = (require "timer")()
+
 local t = {}
 
 local s
@@ -11,6 +13,8 @@ for l in io.lines() do
 		table.insert(s, load('return {' .. l .. '}')())
 	end
 end
+
+timer:log("Read")
 
 local function scalar(a,b)
 	return {a*b[1],a*b[2],a*b[3]}
@@ -63,10 +67,6 @@ end
 
 local function key(t)
 	return string.unpack('I6', string.pack('i2i2i2', t[1], t[2], t[3]))
-end
-
-local function skey(n)
-	return string.unpack('i2i2i2', string.pack('I6', n))
 end
 
 local function norm2(t)
@@ -177,6 +177,7 @@ while #toDo > 0 do
 		end
 	end
 end
+timer:log("DFS")
 
 local count = 0
 local seen = {}

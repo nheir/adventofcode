@@ -1,3 +1,4 @@
+local timer = (require "timer")()
 local t = {}
 
 local function linear(t, acc, d)
@@ -18,6 +19,7 @@ for l in io.lines() do
 		t[#t+1] = linear(load(l)())
 	end
 end
+timer:log("Read and linearize")
 
 local function sum(a,b)
 	local t = {}
@@ -90,8 +92,11 @@ local a = t[1]
 for i=2,#t do
 	a = full_sum(a, t[i])
 end
+timer:log("Sum of all")
 
-print(magnitude(unlinear(a)))
+local number = unlinear(a)
+timer:log("De-linearize")
+print(magnitude(number))
 
 local max = 0
 for i=1,#t do
@@ -102,5 +107,6 @@ for i=1,#t do
 		if v > max then max = v end
 	end
 end
+timer:log("All sums")
 
 print(max)
