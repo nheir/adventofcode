@@ -59,17 +59,20 @@ for i=0,20 do
 	for j=0,20 do
 		for l=1,10 do
 			for m=1,10 do
-				for k1,v1 in pairs(comb) do
-					local pos1 = (l-1+k1) % 10 + 1
-					if i+pos1 >= 21 then
-						pd[i+pos1][j][pos1][m] = pd[i+pos1][j][pos1][m] + v1 * pd[i][j][l][m]
-					else
-						for k2,v2 in pairs(comb) do
-							local pos2 = (m-1+k2) % 10 + 1
-							pd[i+pos1][j+pos2][pos1][pos2] = pd[i+pos1][j+pos2][pos1][pos2] + v1 * v2 * pd[i][j][l][m]
+				local occ = pd[i][j][l][m]
+				if occ > 0 then
+					for k1,v1 in pairs(comb) do
+						local pos1 = (l-1+k1) % 10 + 1
+						if i+pos1 >= 21 then
+							pd[i+pos1][j][pos1][m] = pd[i+pos1][j][pos1][m] + v1 * occ
+						else
+							for k2,v2 in pairs(comb) do
+								local pos2 = (m-1+k2) % 10 + 1
+								pd[i+pos1][j+pos2][pos1][pos2] = pd[i+pos1][j+pos2][pos1][pos2] + v1 * v2 * occ
+							end
 						end
 					end
-			end
+				end
 			end
 		end
 	end
