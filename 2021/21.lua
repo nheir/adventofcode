@@ -55,42 +55,38 @@ for i=1,3 do
 	end
 end
 
-for i=0,20 do
-	for j=0,20 do
-		for l=1,10 do
-			for m=1,10 do
-				local occ = pd[i][j][l][m]
-				if occ > 0 then
-					for k1,v1 in pairs(comb) do
-						local pos1 = (l-1+k1) % 10 + 1
-						if i+pos1 >= 21 then
-							pd[i+pos1][j][pos1][m] = pd[i+pos1][j][pos1][m] + v1 * occ
-						else
-							for k2,v2 in pairs(comb) do
-								local pos2 = (m-1+k2) % 10 + 1
-								pd[i+pos1][j+pos2][pos1][pos2] = pd[i+pos1][j+pos2][pos1][pos2] + v1 * v2 * occ
-							end
-						end
-					end
-				end
-			end
-		end
-	end
+local cache = {}
+local function get_cache(cache, first, ...)
+	if not first then return cache end
+	if not cache then return cache end
+	return get_cache(cache[first], ...)
 end
-timer:log("Compute table [score1][score2][pos1][pos2]")
 
-local count = {0,0}
-for i=21,30 do
-	for j=0,20 do
-		for k=1,10 do
-			for l=1,10 do
-				count[1] = count[1] + pd[i][j][k][l]
-				count[2] = count[2] + pd[j][i][k][l]
-			end
-		end
+local function set_cache(cache, value, first, ...)
+	if not ... then
+		cache[first] = value
+	else
+		if not cache[first] then cache[first] = {} end
+		set_cache(cache[first], value, ...)
 	end
 end
 
-timer:log("Sum victories")
+local function rec(pos1, pos2, score1, score2)
+	if score2 >= 21 then return {0,1} end
+	local v = get_cache(cache, pos1, pos2, score1, score2)
+	if v then return v end
+	v = {0,0}
+	for k,n in pairs(comb) do
+		local pos1 = (pos1 + k - 1) % 10 + 1
+		local r = rec(pos2, pos1, score2, score1 + pos1)
+		v[1] = v[1] + n*r[2]
+		v[2] = v[2] + n*r[1]
+	end
+	set_cache(cache, v, pos1, pos2, score1, score2)
+	return v
+end
+
+local count = rec(p1, p2, 0, 0)
+timer:log("Compute victories")
 
 print(math.max(count[1], count[2]))
