@@ -29,20 +29,19 @@ for i=1,3 do
 	end
 end
 
-local cache = {}
-local function get_cache(cache, first, ...)
-	if not first then return cache end
-	if not cache then return cache end
-	return get_cache(cache[first], ...)
+local function key(a,b,c,d)
+	return a | (b << 4) | (c << 8) | (d << 13)
 end
 
-local function set_cache(cache, value, first, ...)
-	if not ... then
-		cache[first] = value
-	else
-		if not cache[first] then cache[first] = {} end
-		set_cache(cache[first], value, ...)
-	end
+local cache = {}
+local function get_cache(cache, ...)
+	local k = key(...)
+	return cache[k]
+end
+
+local function set_cache(cache, value, ...)
+	local k = key(...)
+	cache[k] = value
 end
 
 local function rec(pos1, pos2, score1, score2)
