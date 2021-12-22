@@ -181,3 +181,30 @@ end
 timer:log("Insertion in complete octree")
 
 print(tree_size(octree))
+
+-- inclusion/exclusion
+local function size(a,b,c,d,e,f)
+	return (b-a)*(d-c)*(f-e)
+end
+
+local cs = {}
+for i=1,#t do
+	local c = t[i]
+	for j=1,#cs do
+		local a,b = table.unpack(cs[j])
+		local inter = intersect3(c, a)
+		if inter then
+			table.insert(cs, { inter, -b })
+		end
+	end
+	if c[7] then
+		table.insert(cs, { c, 1 })
+	end
+end
+
+local count = 0
+for _,c in ipairs(cs) do
+	count = count + c[2]*size(table.unpack(c[1]))
+end
+timer:log("Iterative")
+print(count)
