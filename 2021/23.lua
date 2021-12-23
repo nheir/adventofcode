@@ -40,6 +40,21 @@ local function key(state)
 	return r1 | (r2 << 6) | (r3 << 12) | (r4 << 18) | (h << 24)
 end
 
+local function print_state(state, size)
+	size = size or 2
+	for i,k in ipairs(state.hallway) do
+		io.write(tostring(k))
+	end
+	io.write('\n')
+	for j=size,1,-1 do
+		io.write('  ')
+		for i=1,4 do
+			io.write(tostring(state.r[i][j] or 0), ' ')
+		end
+		io.write('\n')
+	end
+end
+
 local function dup(state)
 	return {
 		hallway={table.unpack(state.hallway)},
@@ -48,7 +63,8 @@ local function dup(state)
 			{table.unpack(state.r[2])},
 			{table.unpack(state.r[3])},
 			{table.unpack(state.r[4])},
-		}
+		},
+		step=state.step+1
 	}
 end
 
@@ -62,6 +78,33 @@ end
 local function neigh(state, size)
 	size = size or 2
 	local states = {}
+	-- room to room, always the best
+	for i=1,4 do
+		local ri = state.r[i];
+		if #ri > 0 and ri[#ri] ~= i then
+			local d = ri[#ri]
+			if roomOk(state.r[d], d) then
+				local a = 0
+				for j=4,8,2 do
+					if (d*2+1 < j and j < i*2+1) or (i*2+1 < j and j < d*2+1) then
+						a = a + state.hallway[j]
+					end
+				end
+				if a == 0 then
+					local s = dup(state)
+					table.insert(s.r[d], table.remove(s.r[i]))
+					s.cost = (size - #s.r[i]) + (size - #state.r[d])
+					s.cost = s.cost + ((d > i) and (d - i) or (i - d)) * 2
+					s.cost = state.cost + scost[d] * s.cost
+					table.insert(states, s)
+				end
+			end
+		end
+	end
+	-- dont consider other choices
+	if #states > 0 then return states end
+
+	-- hallway to room then
 	for i=1,11 do
 		if state.hallway[i] > 0 then
 			local d = state.hallway[i]
@@ -88,7 +131,13 @@ local function neigh(state, size)
 					table.insert(states, s)
 				end
 			end
-		elseif not rpos[i] then
+		end
+	end
+	if #states > 0 then return states end
+
+	-- ok, explore room to hallway
+	for i=1,11 do
+		if state.hallway[i] == 0 and not rpos[i] then
 			for j=i+1,11 do
 				if state.hallway[j] > 0 then break end
 				if rpos[j] then
@@ -136,8 +185,8 @@ local function pop(t)
 	while t[2*i] do
 		local m = i
 		t[i] = v
-		if t[2*i].v < t[m].v then m = 2*i end
-		if t[2*i+1] and t[2*i+1].v < t[m].v then m = 2*i+1 end
+		if t[2*i].v <= t[m].v then m = 2*i end
+		if t[2*i+1] and t[2*i+1].v <= t[m].v then m = 2*i+1 end
 		if m == i then break end
 		t[i] = t[m]
 		i = m
@@ -146,28 +195,13 @@ local function pop(t)
 	return ret
 end
 
-local function print_state(state, size)
-	size = size or 2
-	for i,k in ipairs(state.hallway) do
-		io.write(tostring(k))
-	end
-	io.write('\n')
-	for j=size,1,-1 do
-		io.write('  ')
-		for i=1,4 do
-			io.write(tostring(state.r[i][j] or 0), ' ')
-		end
-		io.write('\n')
-	end
-end
-
 local endStateKey = key({
 	hallway={0,0,0,0,0,0,0,0,0,0,0},
 	r={{1,1},{2,2},{3,3},{4,4}},
 })
 
 local hallway = {0,0,0,0,0,0,0,0,0,0,0}
-local start = {hallway=hallway, r={pA, pB, pC, pD}, cost=0}
+local start = {hallway=hallway, r={pA, pB, pC, pD}, cost=0,step=0}
 local queue = {}
 local seen = {}
 insert(queue, 0, start)
@@ -183,7 +217,7 @@ while #queue > 0 do
 		seen[k] = true
 		if k == endStateKey then
 			print_state(top)
-			print(top.cost)
+			print(string.format("Part 1: %d in %d steps", top.cost, top.step))
 			break
 		end
 		for _,s in ipairs(neigh(top)) do
@@ -219,7 +253,8 @@ local start = {
 		{pC[1], 1, 2, pC[2]},
 		{pD[1], 3, 1, pD[2]},
 	},
-	cost=0
+	cost=0,
+	step=0
 }
 
 local queue = {}
@@ -237,7 +272,7 @@ while #queue > 0 do
 		seen[k1][k2] = true
 		if k1 == endStateKey1 and k2 == endStateKey2 then
 			print_state(top, 4)
-			print(top.cost)
+			print(string.format("Part 2: %d in %d steps", top.cost, top.step))
 			break
 		end
 		for _,s in ipairs(neigh(top, 4)) do
