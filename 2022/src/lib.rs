@@ -29,4 +29,4 @@ pub mod day01;
 //pub mod day24;
 //pub mod day25;
 
-aoc_lib!{ year = 2022 }
+aoc_lib! { year = 2022 }
