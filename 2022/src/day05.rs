@@ -1,83 +1,83 @@
 // I'm definitely doing things wrong here
 
-fn coi(input: &str) -> Vec<u8> {
-    let mut ret: Vec<u8> = vec![];
-    for (i, c) in input.chars().enumerate() {
-        if i & 3 == 1 {
-            ret.push(c as u8)
+use std::str::FromStr;
+
+type Stack = Vec<u8>;
+type Stacks = Vec<Stack>;
+pub struct Instruction {
+    count: usize,
+    from: usize,
+    to: usize,
+}
+type Instructions = Vec<Instruction>;
+
+impl FromStr for Instruction {
+    type Err = u8;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut sl = s
+            .split_whitespace()
+            .filter(|s| s.chars().all(|c| c.is_numeric()));
+        Ok(Instruction {
+            count: sl.next().unwrap().parse::<usize>().unwrap(),
+            from: sl.next().unwrap().parse::<usize>().unwrap() - 1,
+            to: sl.next().unwrap().parse::<usize>().unwrap() - 1,
+        })
+    }
+}
+
+impl Instruction {
+    fn move9000(&self, ss: &mut Stacks) {
+        for _ in 0..self.count {
+            let head = ss[self.from].pop().unwrap();
+            ss[self.to].push(head)
         }
     }
-    ret
+    fn move9001(&self, ss: &mut Stacks) {
+        let p = ss[self.from].len() - self.count;
+        for i in 0..self.count {
+            let v = ss[self.from][p + i];
+            ss[self.to].push(v);
+        }
+        ss[self.from].truncate(p);
+    }
 }
 
 #[aoc_generator(day5)]
-pub fn input_generator(input: &str) -> (Vec<Vec<u8>>, Vec<(usize, usize, usize)>) {
-    let mut stacks: Vec<Vec<u8>> = vec![];
-    for l in input.lines() {
-        let cois = coi(l);
-        if cois.len() > stacks.len() {
-            for _ in (stacks.len()..cois.len()) {
-                stacks.push(vec![]);
+pub fn input_generator(input: &str) -> (Stacks, Instructions) {
+    let (ss, ii) = input.split_once("\n\n").unwrap();
+    let n = ss.lines().last().unwrap().len() / 4 + 1;
+    let mut stacks: Stacks = (0..n).map(|_| vec![]).collect();
+
+    for l in ss.lines().rev().skip(1) {
+        for (i, c) in l.bytes().skip(1).step_by(4).enumerate() {
+            if c != b' ' {
+                stacks[i].push(c);
             }
         }
-        if cois[0] == b'1' {
-            break;
-        }
-        for (i, c) in cois.iter().enumerate() {
-            if *c != b' ' {
-                stacks[i].push(*c);
-            }
-        }
-    }
-    let mut r = vec![];
-    for (i, v) in stacks.iter().enumerate() {
-        let mut v = v.clone();
-        v.reverse();
-        r.push(v);
     }
 
-    let mut mv: Vec<(usize, usize, usize)> = vec![];
-    for l in input.lines() {
-        if l.chars().nth(0) != Some('m') {
-            continue;
-        }
-        let sl = l.split(' ');
-        let mut sl = sl.filter(|s| s.chars().all(|c| c.is_numeric()));
-        mv.push((
-            sl.next().unwrap().parse().unwrap(),
-            sl.next().unwrap().parse().unwrap(),
-            sl.next().unwrap().parse().unwrap(),
-        ));
-    }
-    (r, mv)
+    let mv: Instructions = ii
+        .lines()
+        .map(|l| l.parse::<Instruction>().unwrap())
+        .collect();
+    (stacks, mv)
 }
 
 #[aoc(day5, part1)]
-pub fn part1(input: &(Vec<Vec<u8>>, Vec<(usize, usize, usize)>)) -> String {
-    let mut a = input.0.iter().map(|v| v.clone()).collect::<Vec<Vec<u8>>>();
-    let b = &input.1;
-    for (x, y, z) in b {
-        for _ in 0..*x {
-            let head = a[*y - 1].pop().unwrap();
-            a[*z - 1].push(head)
-        }
+pub fn part1((ss, is): &(Stacks, Instructions)) -> String {
+    let mut a = ss.clone();
+    for inst in is {
+        inst.move9000(&mut a);
     }
     String::from_utf8(a.iter().map(|v| *v.last().unwrap()).collect()).unwrap()
 }
 
 #[aoc(day5, part2)]
-pub fn part2(input: &(Vec<Vec<u8>>, Vec<(usize, usize, usize)>)) -> String {
-    let mut a = input.0.iter().map(|v| v.clone()).collect::<Vec<Vec<u8>>>();
-    let b = &input.1;
-    for (x, y, z) in b {
-        let p = a[*y - 1].len() - *x;
-        for i in 0..*x {
-            let v = a[*y - 1][p+i];
-            a[*z - 1].push(v);
-        }
-        for _ in 0..*x {
-            a[*y-1].pop();
-        }
+pub fn part2((ss, is): &(Stacks, Instructions)) -> String {
+    let mut a = ss.clone();
+    for inst in is {
+        inst.move9001(&mut a);
     }
     String::from_utf8(a.iter().map(|v| *v.last().unwrap()).collect()).unwrap()
 }
