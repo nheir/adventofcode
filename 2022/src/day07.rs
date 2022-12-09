@@ -2,14 +2,14 @@ use std::str::Lines;
 
 pub struct Tree {
     size: u32,
-    children: Vec<Box<Tree>>,
+    children: Vec<Tree>,
 }
 
-fn read_tree(input: &mut Lines) -> Box<Tree> {
-    let mut t = Box::new(Tree {
+fn read_tree(input: &mut Lines) -> Tree {
+    let mut t = Tree {
         size: 0,
         children: vec![],
-    });
+    };
     while let Some(line) = input.next() {
         if line.starts_with("$") {
             if line[2..4].eq("cd") {
@@ -23,10 +23,10 @@ fn read_tree(input: &mut Lines) -> Box<Tree> {
             let (left, _) = line.split_once(" ").unwrap();
             if left == "dir" {
             } else {
-                t.children.push(Box::new(Tree {
+                t.children.push(Tree {
                     size: left.parse().unwrap(),
                     children: vec![],
-                }))
+                })
             }
         }
     }
@@ -35,7 +35,7 @@ fn read_tree(input: &mut Lines) -> Box<Tree> {
 }
 
 #[aoc_generator(day7)]
-pub fn input_generator(input: &str) -> Box<Tree> {
+pub fn input_generator(input: &str) -> Tree {
     let mut a = input.clone().lines();
     read_tree(&mut a)
 }
