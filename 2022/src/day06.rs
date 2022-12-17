@@ -1,31 +1,40 @@
-use std::collections::HashSet;
+fn find_key(input: &str, size: usize) -> usize {
+    let v = input
+        .bytes()
+        .map(|c| (c - b'a') as usize)
+        .collect::<Vec<usize>>();
+    let mut map = [0; 26];
+    let mut counter = 0;
+    for &c in v.iter().take(size) {
+        if map[c] == 0 {
+            counter += 1;
+        }
+        map[c] += 1;
+    }
+    for (i, &c) in v.iter().skip(size).enumerate() {
+        if counter == size {
+            return i + size;
+        }
+        if map[c] == 0 {
+            counter += 1;
+        }
+        map[c] += 1;
+        map[v[i]] -= 1;
+        if map[v[i]] == 0 {
+            counter -= 1;
+        }
+    }
+    input.len()
+}
 
 #[aoc(day6, part1)]
 pub fn part1(input: &str) -> usize {
-    for c in 0..input.len() - 4 {
-        let mut hs = HashSet::new();
-        for i in input[c..c + 4].bytes() {
-            hs.insert(i);
-        }
-        if hs.len() == 4 {
-            return c + 4;
-        }
-    }
-    0
+    find_key(input, 4)
 }
 
 #[aoc(day6, part2)]
 pub fn part2(input: &str) -> usize {
-    for c in 0..input.len() - 14 {
-        let mut hs = HashSet::new();
-        for i in input[c..c + 14].bytes() {
-            hs.insert(i);
-        }
-        if hs.len() == 14 {
-            return c + 14;
-        }
-    }
-    0
+    find_key(input, 14)
 }
 
 #[cfg(test)]
