@@ -6,8 +6,14 @@ pub struct Node {
     rate: u32,
     neighbors: Vec<Valve>,
 }
+
 type Graph = HashMap<Valve, Node>;
 type Dist = HashMap<(Valve, Valve), u32>;
+
+pub struct World {
+    rates: [u32; 16],
+    dist: [[u32; 16]; 16],
+}
 
 fn dist(g: &Graph) -> Dist {
     let mut d = Dist::new();
@@ -39,8 +45,7 @@ fn dist(g: &Graph) -> Dist {
     d
 }
 
-#[aoc_generator(day16)]
-pub fn input_generator(input: &str) -> Graph {
+fn read_graph(input: &str) -> Graph {
     let mut hm: Graph = Graph::new();
     for l in input.lines() {
         let l: Vec<_> = l
@@ -69,105 +74,77 @@ pub fn input_generator(input: &str) -> Graph {
     hm
 }
 
-fn explore(
-    nodes: &HashMap<Valve, u32>,
-    dist: &Dist,
-    current: Valve,
-    opened: &mut HashSet<Valve>,
-    score: u32,
-    max: u32,
-    step: u32,
-) -> u32 {
-    let mut max = max.max(score);
-    for (&c, &rate) in nodes {
-        let &d = dist.get(&(current, c)).unwrap();
-        if rate > 0 && !opened.contains(&c) && d < step {
-            let delta = (step - d - 1) * rate;
-            opened.insert(c);
-            max = explore(nodes, dist, c, opened, score + delta, max, step - d - 1);
-            opened.remove(&c);
-        }
-    }
-    max
-}
-
-// exhaustive search doesn't end but we luckily get the best result in the first few minutes
-fn explore_duo(
-    nodes: &HashMap<Valve, u32>,
-    dist: &Dist,
-    current: (Valve, Valve),
-    opened: &mut HashSet<Valve>,
-    score: u32,
-    max: u32,
-    step: (u32, u32),
-) -> u32 {
-    if max < score {
-        dbg!(score);
-    }
-    let mut max = max.max(score);
-    for (&c, &rate) in nodes {
-        let &d = dist.get(&(current.0, c)).unwrap();
-        if d < step.0 && !opened.contains(&c) {
-            let delta = (step.0 - d - 1) * rate;
-            opened.insert(c);
-            max = explore_duo(
-                nodes,
-                dist,
-                (c, current.1),
-                opened,
-                score + delta,
-                max,
-                (step.0 - d - 1, if step.0 < step.1 { 0 } else { step.1 }),
-            );
-            opened.remove(&c);
-        }
-        let &d = dist.get(&(current.1, c)).unwrap();
-        if d < step.1 && !opened.contains(&c) {
-            let delta = (step.1 - d - 1) * rate;
-            opened.insert(c);
-            max = explore_duo(
-                nodes,
-                dist,
-                (current.0, c),
-                opened,
-                score + delta,
-                max,
-                (if step.1 < step.0 { 0 } else { step.0 }, step.1 - d - 1),
-            );
-            opened.remove(&c);
-        }
-    }
-    max
-}
-
-#[aoc(day16, part1)]
-pub fn solve_part1(input: &Graph) -> u32 {
-    let dist = dist(input);
-    let nodes: HashMap<Valve, u32> = input
+#[aoc_generator(day16)]
+pub fn input_generator(input: &str) -> World {
+    let graph = read_graph(input);
+    let dist = dist(&graph);
+    let nodes: HashMap<Valve, u32> = graph
         .iter()
-        .filter(|(_, n)| n.rate > 0)
+        .filter(|&(v, n)| n.rate > 0 || *v == (b'A', b'A'))
         .map(|(v, n)| (*v, n.rate))
         .collect();
-    explore(&nodes, &dist, (b'A', b'A'), &mut HashSet::new(), 0, 0, 30)
+    let mut keys: Vec<_> = nodes.keys().copied().collect();
+    keys.sort();
+    let names: HashMap<_, _> = keys.iter().enumerate().map(|(a, &b)| (b, a)).collect();
+
+    assert!(names.len() == 16);
+
+    let mut sg = [[0 as u32; 16]; 16];
+    for ((a, b), d) in dist {
+        if let Some(&i) = names.get(&a) {
+            if let Some(&j) = names.get(&b) {
+                sg[i][j] = d;
+            }
+        }
+    }
+    let mut rates = [0; 16];
+    for (k, v) in nodes {
+        let &i = names.get(&k).unwrap();
+        rates[i] = v;
+    }
+    World {
+        rates: rates,
+        dist: sg,
+    }
+}
+
+fn explore_dyn(world: &World) -> Box<[[[u32; 0x10000]; 31]; 16]> {
+    let mut search_array = Box::new([[[0 as u32; 0x10000]; 31]; 16]);
+    for set in 0..0x10000 {
+        for v in 0..16 {
+            for t in 0..31 {
+                let mut best: u32 = 0;
+                for u in 0..16 {
+                    if set & (1 << u) != 0 && world.dist[u][v] < t {
+                        let set = set ^ (1 << u);
+                        let t = t - world.dist[u][v] - 1;
+                        let score = search_array[u][t as usize][set] + t * world.rates[u];
+                        best = best.max(score);
+                    }
+                }
+                search_array[v][t as usize][set] = best;
+            }
+        }
+    }
+    search_array
+}
+
+
+#[aoc(day16, part1)]
+pub fn solve_part1(input: &World) -> u32 {
+    let search = explore_dyn(&input);
+    *search[0][30].iter().max().unwrap()
 }
 
 #[aoc(day16, part2)]
-pub fn solve_part2(input: &Graph) -> u32 {
-    let dist = dist(input);
-    let nodes: HashMap<Valve, u32> = input
-        .iter()
-        .filter(|(_, n)| n.rate > 0)
-        .map(|(v, n)| (*v, n.rate))
-        .collect();
-    explore_duo(
-        &nodes,
-        &dist,
-        ((b'A', b'A'), (b'A', b'A')),
-        &mut HashSet::new(),
-        0,
-        0,
-        (26, 26),
-    )
+pub fn solve_part2(input: &World) -> u32 {
+    let search = explore_dyn(&input);
+    let mut best = 0;
+    for s in 0..0x8000 {
+        let score = search[0][26][s] + search[0][26][0xffff ^ s];
+        best = best.max(score);
+    }
+    best
 }
 
 #[cfg(test)]
