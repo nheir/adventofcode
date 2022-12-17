@@ -1,24 +1,14 @@
-type Round = (i32, i32);
+type Round = (u8, u8);
 
 #[aoc_generator(day2)]
 pub fn input_generator(input: &str) -> Vec<Round> {
     input
         .lines()
         .map(|l| {
-            let mut round = l.trim().split(' ');
+            let (left, right) = l.trim().split_once(' ').unwrap();
             (
-                match round.next().unwrap() {
-                    "A" => 0,
-                    "B" => 1,
-                    "C" => 2,
-                    _ => unreachable!(),
-                },
-                match round.next().unwrap() {
-                    "X" => 0,
-                    "Y" => 1,
-                    "Z" => 2,
-                    _ => unreachable!(),
-                },
+                left.bytes().nth(0).unwrap() - b'A',
+                right.bytes().nth(0).unwrap() - b'X',
             )
         })
         .collect()
@@ -28,15 +18,11 @@ pub fn input_generator(input: &str) -> Vec<Round> {
 pub fn solve_part1(input: &[Round]) -> i32 {
     input
         .iter()
-        .map(|&(a, x)| {
-            if a == x {
-                x + 3 + 1
-            } else if (a + 1) % 3 == x {
-                x + 6 + 1
-            } else {
-                x + 1
-            }
-        })
+        .map(|&(a, x)| match (3 + a - x) % 3 {
+            0 => x + 3 + 1,
+            1 => x + 6 + 1,
+            _ => x + 1,
+        } as i32)
         .sum()
 }
 
@@ -44,15 +30,11 @@ pub fn solve_part1(input: &[Round]) -> i32 {
 pub fn solve_part2(input: &[Round]) -> i32 {
     input
         .iter()
-        .map(|&(a, x)| {
-            if 0 == x {
-                (a + 2) % 3 + 1
-            } else if 1 == x {
-                a + 3 + 1
-            } else {
-                (a + 1) % 3 + 6 + 1
-            }
-        })
+        .map(|&(a, x)| match x {
+            0 => (a + 2) % 3 + 1,
+            1 => a + 3 + 1,
+            _ => (a + 1) % 3 + 6 + 1,
+        } as i32)
         .sum()
 }
 
