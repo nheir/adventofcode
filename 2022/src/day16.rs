@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 type Valve = (u8, u8);
 #[derive(Debug)]
@@ -13,6 +13,7 @@ type Dist = HashMap<(Valve, Valve), u32>;
 pub struct World {
     rates: [u32; 16],
     dist: [[u32; 16]; 16],
+    size: usize,
 }
 
 fn dist(g: &Graph) -> Dist {
@@ -87,7 +88,7 @@ pub fn input_generator(input: &str) -> World {
     keys.sort();
     let names: HashMap<_, _> = keys.iter().enumerate().map(|(a, &b)| (b, a)).collect();
 
-    assert!(names.len() == 16);
+    assert!(names.len() <= 16);
 
     let mut sg = [[0 as u32; 16]; 16];
     for ((a, b), d) in dist {
@@ -105,35 +106,60 @@ pub fn input_generator(input: &str) -> World {
     World {
         rates: rates,
         dist: sg,
+        size: names.len(),
     }
 }
 
-fn explore_dyn(world: &World) -> Box<[[[u32; 0x10000]; 31]; 16]> {
-    let mut search_array = Box::new([[[0 as u32; 0x10000]; 31]; 16]);
+struct DynArray {
+    data: Vec<u32>,
+    dim: (usize, usize, usize),
+}
+
+impl DynArray {
+    fn new(a: usize, b: usize, c: usize) -> Self {
+        DynArray {
+            data: vec![0;a * b * c],
+            dim: (a, b, c),
+        }
+    }
+    fn key(&self, i: usize, j: usize, k: usize) -> usize {
+        (i * self.dim.1 + j) * self.dim.2 + k
+    }
+    fn get(&self, i: usize, j: usize, k: usize) -> u32 {
+        self.data[self.key(i, j, k)]
+    }
+
+    fn set(&mut self, i: usize, j: usize, k: usize, v: u32) {
+        let key = self.key(i, j, k);
+        self.data[key] = v;
+    }
+}
+
+fn explore_dyn(world: &World) -> DynArray {
+    let mut search_array = DynArray::new(world.size, 31, 0x10000);
     for set in 0..0x10000 {
-        for v in 0..16 {
+        for v in 0..world.size {
             for t in 0..31 {
                 let mut best: u32 = 0;
-                for u in 0..16 {
+                for u in 0..world.size {
                     if set & (1 << u) != 0 && world.dist[u][v] < t {
                         let set = set ^ (1 << u);
                         let t = t - world.dist[u][v] - 1;
-                        let score = search_array[u][t as usize][set] + t * world.rates[u];
+                        let score = search_array.get(u, t as usize, set) + t * world.rates[u];
                         best = best.max(score);
                     }
                 }
-                search_array[v][t as usize][set] = best;
+                search_array.set(v, t as usize, set, best);
             }
         }
     }
     search_array
 }
 
-
 #[aoc(day16, part1)]
 pub fn solve_part1(input: &World) -> u32 {
     let search = explore_dyn(&input);
-    *search[0][30].iter().max().unwrap()
+    (0..0x10000).map(|s| search.get(0, 30, s)).max().unwrap()
 }
 
 #[aoc(day16, part2)]
@@ -141,7 +167,7 @@ pub fn solve_part2(input: &World) -> u32 {
     let search = explore_dyn(&input);
     let mut best = 0;
     for s in 0..0x8000 {
-        let score = search[0][26][s] + search[0][26][0xffff ^ s];
+        let score = search.get(0, 26, s) + search.get(0, 26, 0xffff ^ s);
         best = best.max(score);
     }
     best
