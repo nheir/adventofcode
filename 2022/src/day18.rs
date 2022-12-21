@@ -99,11 +99,11 @@ mod tests {
 2,3,5";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&input_generator(EXAMPLE)), 64);
     }
     #[test]
-    fn part2_examples() {
+    fn part2_example() {
         assert_eq!(part2(&input_generator(EXAMPLE)), 58);
     }
 }

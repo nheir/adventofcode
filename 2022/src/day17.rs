@@ -248,11 +248,11 @@ mod tests {
     const EXAMPLE: &str = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&EXAMPLE.as_bytes()), 3068);
     }
     #[test]
-    fn part2_examples() {
+    fn part2_example() {
         assert_eq!(part2(&EXAMPLE.as_bytes()), 1514285714288);
     }
 }

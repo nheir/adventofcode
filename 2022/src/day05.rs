@@ -97,12 +97,12 @@ move 2 from 2 to 1
 move 1 from 1 to 2";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&input_generator(EXAMPLE)), "CMZ");
     }
 
     #[test]
-    fn part2_examples() {
+    fn part2_example() {
         assert_eq!(part2(&input_generator(EXAMPLE)), "MCD");
     }
 }

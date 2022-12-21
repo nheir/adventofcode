@@ -102,7 +102,12 @@ $ ls
 7214296 k";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&input_generator(&EXAMPLE)), 95437);
+    }
+
+    #[test]
+    fn part2_example() {
+        assert_eq!(part2(&input_generator(&EXAMPLE)), 24933642);
     }
 }

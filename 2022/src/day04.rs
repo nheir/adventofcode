@@ -3,19 +3,12 @@ pub fn input_generator(input: &str) -> Vec<((u32, u32), (u32, u32))> {
     input
         .lines()
         .map(|l| {
-            let mut a = l.split(",");
-            let (l, r) = (a.next().unwrap(), a.next().unwrap());
-            let mut li = l.split("-");
-            let mut ri = r.split("-");
+            let (l, r) = l.split_once(",").unwrap();
+            let l = l.split_once("-").unwrap();
+            let r = r.split_once("-").unwrap();
             (
-                (
-                    li.next().unwrap().parse().unwrap(),
-                    li.next().unwrap().parse().unwrap(),
-                ),
-                (
-                    ri.next().unwrap().parse().unwrap(),
-                    ri.next().unwrap().parse().unwrap(),
-                ),
+                (l.0.parse().unwrap(), l.1.parse().unwrap()),
+                (r.0.parse().unwrap(), r.1.parse().unwrap()),
             )
         })
         .collect()
@@ -57,11 +50,11 @@ mod tests {
 2-6,4-8";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&input_generator(EXAMPLE)), 2);
     }
     #[test]
-    fn part2_examples() {
+    fn part2_example() {
         assert_eq!(part2(&input_generator(EXAMPLE)), 4);
     }
 }

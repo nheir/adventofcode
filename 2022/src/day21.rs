@@ -158,11 +158,11 @@ drzm: hmdt - zczc
 hmdt: 32";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&input_generator(EXAMPLE)), 152);
     }
     #[test]
-    fn part2_examples() {
+    fn part2_example() {
         assert_eq!(part2(&input_generator(EXAMPLE)), 301);
     }
 }

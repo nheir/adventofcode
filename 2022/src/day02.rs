@@ -50,4 +50,9 @@ C Z";
     fn part1_example() {
         assert_eq!(solve_part1(&input_generator(&EXAMPLE)), 15);
     }
+
+    #[test]
+    fn part2_example() {
+        assert_eq!(solve_part2(&input_generator(&EXAMPLE)), 12);
+    }
 }

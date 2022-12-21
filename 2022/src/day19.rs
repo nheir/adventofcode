@@ -211,11 +211,11 @@ Blueprint 2:
   Each geode robot costs 3 ore and 12 obsidian.";
 
     #[test]
-    fn part1_examples() {
+    fn part1_example() {
         assert_eq!(part1(&input_generator(EXAMPLE)), 33);
     }
     #[test]
-    fn part2_examples() {
+    fn part2_example() {
         let r: Vec<_> = input_generator(EXAMPLE)
             .iter()
             .take(3)
