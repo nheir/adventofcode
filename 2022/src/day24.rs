@@ -46,7 +46,7 @@ fn bfs(world: &World, t: i32, start: (i32, i32), end: (i32, i32)) -> i32 {
     let mut mt = t;
     queue.push_back((start.0, start.1, t));
     while let Some((i, j, t)) = queue.pop_front() {
-        if (i,j) == end {
+        if (i, j) == end {
             return t;
         }
         if mt < t {
@@ -91,14 +91,14 @@ pub fn input_generator(input: &str) -> World {
 
 #[aoc(day24, part1)]
 pub fn part1(world: &World) -> i32 {
-    bfs(&world, 0, (0, -1), (world.w-1, world.h))
+    bfs(&world, 0, (0, -1), (world.w - 1, world.h))
 }
 
 #[aoc(day24, part2)]
 pub fn part2(world: &World) -> i32 {
-    let t = bfs(&world, 0, (0, -1), (world.w-1, world.h));
-    let t = bfs(&world, t, (world.w-1, world.h), (0, -1));
-    bfs(&world, t, (0, -1), (world.w-1, world.h))
+    let t = bfs(&world, 0, (0, -1), (world.w - 1, world.h));
+    let t = bfs(&world, t, (world.w - 1, world.h), (0, -1));
+    bfs(&world, t, (0, -1), (world.w - 1, world.h))
 }
 
 #[cfg(test)]
