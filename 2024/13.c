@@ -59,6 +59,15 @@ long solve2(long ax, long ay, long bx, long by, long px, long py) {
     return 0;
 }
 
+long solve3(long ax, long ay, long bx, long by, long px, long py) {
+    long d = ax * by - bx * ay;
+    long u = px * by - py * bx;
+    long v = -px * ay + py * ax;
+    if (u % d == 0 && v % d == 0) // u*d >= 0 && v*d >= 0
+        return (u * 3 + v) / d;
+    return 0;
+}
+
 int main(void) {
     int ax, ay, bx, by, px, py;
     unsigned long count1 = 0;
@@ -67,8 +76,8 @@ int main(void) {
                  "Button B: X+%d, Y+%d\n"
                  "Prize: X=%d, Y=%d\n",
                  &ax, &ay, &bx, &by, &px, &py) == 6) {
-        count1 += solve1(ax, ay, bx, by, px, py);
-        count2 += solve2(ax, ay, bx, by, px + 10000000000000L, py + 10000000000000L);
+        count1 += solve3(ax, ay, bx, by, px, py);
+        count2 += solve3(ax, ay, bx, by, px + 10000000000000L, py + 10000000000000L);
     }
     printf("%lu\n", count1);
     printf("%lu\n", count2);
