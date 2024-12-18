@@ -3,6 +3,7 @@
 #include <string.h>
 
 #define SIZE 71
+#define USE_BYTES 1024
 
 enum {
     UP = 0,
@@ -82,7 +83,6 @@ void merge(struct UF *uf, int x, int y) {
 
 void mark(char map[][SIZE], struct UF *uf, int x, int y) {
     map[y][x] = 1;
-    // Diagonals are missing but it's ok for the given input...
     if (x == 0)
         merge(uf, x * SIZE + y, SIZE * SIZE + LEFT);
     else if (map[y][x - 1])
@@ -99,6 +99,16 @@ void mark(char map[][SIZE], struct UF *uf, int x, int y) {
         merge(uf, x * SIZE + y, SIZE * SIZE + DOWN);
     else if (map[y + 1][x])
         merge(uf, x * SIZE + y, x * SIZE + y + 1);
+
+    // Fix example but useless on input...
+    if (y > 0 && x > 0 && map[y - 1][x - 1])
+        merge(uf, x * SIZE + y, (x - 1) * SIZE + y - 1);
+    if (y > 0 && x < SIZE - 1 && map[y - 1][x + 1])
+        merge(uf, x * SIZE + y, (x + 1) * SIZE + y - 1);
+    if (y < SIZE - 1 && x > 0 && map[y + 1][x - 1])
+        merge(uf, x * SIZE + y, (x - 1) * SIZE + y + 1);
+    if (y < SIZE - 1 && x < SIZE - 1 && map[y + 1][x + 1])
+        merge(uf, x * SIZE + y, (x + 1) * SIZE + y + 1);
 }
 
 unsigned bfs(char map[][SIZE]) {
@@ -144,7 +154,7 @@ int main(void) {
     merge(&uf, SIZE * SIZE + UP, SIZE * SIZE + RIGHT);
 
     int x, y;
-    for (int i = 0; i < 1024 && scanf("%d,%d", &x, &y) == 2; i++) {
+    for (int i = 0; i < USE_BYTES && scanf("%d,%d", &x, &y) == 2; i++) {
         mark(map, &uf, x, y);
     }
 
