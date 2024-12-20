@@ -4,48 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct da {
-    struct sv *data;
-    size_t capacity;
-    size_t len;
-};
-
-int startswith(struct sv sv, struct sv pref) {
-    return sv.len >= pref.len && memcmp(sv.data, pref.data, pref.len) == 0;
-}
-
-void add(struct da *da, struct sv sv) {
-    if (da->len >= da->capacity) {
-        if (da->capacity)
-            da->capacity *= 2;
-        else
-            da->capacity = 256;
-        void *ptr = realloc(da->data, da->capacity * sizeof(*da->data));
-        if (ptr == NULL) {
-            perror("not enough memory...");
-            free(da->data);
-            exit(EXIT_FAILURE);
-        }
-        da->data = ptr;
-    }
-    da->data[da->len++] = sv;
-}
-
 int main(void) {
     struct str content = read_input();
-    struct sv sv = {.data = content.data, .len = content.len};
+    struct sv content_view = {.data = content.data, .len = content.len};
 
-    struct pair p = split(sv, '\n');
-    struct sv pattern_line = p.left;
-    struct da da = {0};
-    for (struct pair p = split(pattern_line, ' '); p.left.len; p = split(p.right, ' ')) {
-        add(&da, split(p.left, ',').left);
-    }
+    struct pair pline = split(content_view, '\n');
+    
+    size_t pattern_count;
+    struct sv *patterns = sv_split_array(pline.left, LIT2SV(", "), &pattern_count);
 
-    p = split(p.right, '\n');
-    struct sv designs = p.right;
+    pline = split(pline.right, '\n');
+    struct sv designs = pline.right;
+
     int count1 = 0;
     long count2 = 0;
+    
     long *ptr = NULL;
     for (struct pair p = split(designs, '\n'); p.left.len; p = split(p.right, '\n')) {
         struct sv design = p.left;
@@ -56,9 +29,9 @@ int main(void) {
             if (!ptr[i])
                 continue;
             struct sv sub = {.data = design.data + i, .len = design.len - i};
-            for (size_t j = 0; j < da.len; j++) {
-                if (startswith(sub, da.data[j])) {
-                    ptr[i + da.data[j].len] += ptr[i];
+            for (size_t j = 0; j < pattern_count; j++) {
+                if (sv_startswith(sub, patterns[j])) {
+                    ptr[i + patterns[j].len] += ptr[i];
                 }
             }
         }
@@ -67,7 +40,8 @@ int main(void) {
         count2 += ptr[design.len];
     }
     free(ptr);
-    free(da.data);
+    free(patterns);
+
     str_destroy(&content);
 
     printf("%d\n", count1);

@@ -25,7 +25,7 @@
             }                                                                                                          \
             name.data = ptr;                                                                                           \
         }                                                                                                              \
-        memcpy(name.data + name.len, &value, sizeof(T));                                                               \
+        name.data[name.len] = value;                                                                                   \
         name.len++;                                                                                                    \
     } while (0);
 
