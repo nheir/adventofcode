@@ -1,188 +1,34 @@
-#include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define BOT_NUM 2
+#define BOT_NUM 25
 
-enum Directional {
-    GAP,
-    UP,
-    D_A,
-    LEFT,
-    DOWN,
-    RIGHT,
-    D_MAX,
-};
+const char keypad[4][3] = {{'7', '8', '9'}, {'4', '5', '6'}, {'1', '2', '3'}, {' ', '0', 'A'}};
+const int poskey[128] = {['7'] = 0, ['8'] = 1, ['9'] = 2, ['4'] = 3,  ['5'] = 4, ['6'] = 5,
+                         ['1'] = 6, ['2'] = 7, ['3'] = 8, ['0'] = 10, ['A'] = 11};
 
-enum NumPad {
-    N_7,
-    N_8,
-    N_9,
-    N_4,
-    N_5,
-    N_6,
-    N_1,
-    N_2,
-    N_3,
-    N_G,
-    N_0,
-    N_A,
-    N_MAX,
-};
+const char dirpad[2][3] = {{' ', '^', 'A'}, {'<', 'v', '>'}};
 
-const char NumChar[] = {
-    [N_7] = '7', [N_8] = '8', [N_9] = '9', [N_4] = '4', [N_5] = '5', [N_6] = '6',
-    [N_1] = '1', [N_2] = '2', [N_3] = '3', [N_0] = '0', [N_A] = 'A',
-};
-
-struct XY {
-    int x, y;
-};
-
-struct XY next_coord(struct XY xy, int dir) {
-    switch (dir) {
-    case UP:
-        xy.y--;
-        break;
-    case DOWN:
-        xy.y++;
-        break;
-    case LEFT:
-        xy.x--;
-        break;
-    case RIGHT:
-        xy.x++;
-        break;
+void enumerate_path(long acc, char prev, int gap, int sx, int sy, int ex, int ey, long cost[128][128], long *min) {
+    if (sx == ex && sy == ey) {
+        acc += cost[prev]['A'];
+        if (*min > acc)
+            *min = acc;
+        return;
     }
-    return xy;
+    if (sx+sy*3 == gap) return;
+    if (sx < ex) enumerate_path(acc + cost[prev]['>'], '>', gap, sx+1, sy, ex, ey, cost, min);
+    if (sx > ex) enumerate_path(acc + cost[prev]['<'], '<', gap, sx-1, sy, ex, ey, cost, min);
+    if (sy > ey) enumerate_path(acc + cost[prev]['^'], '^', gap, sx, sy-1, ex, ey, cost, min);
+    if (sy < ey) enumerate_path(acc + cost[prev]['v'], 'v', gap, sx, sy+1, ex, ey, cost, min);
 }
 
-struct item {
-    struct XY bot[BOT_NUM + 1];
-    int step;
-    unsigned cost;
-};
-
-int next(struct item *it, enum Directional d, char input[4]) {
-    int i;
-    it->cost++;
-    for (i = 0; i < BOT_NUM && d == D_A; i++) {
-        d = it->bot[i].x + it->bot[i].y * 3;
-    }
-    if (d == D_A) {
-        int v = it->bot[BOT_NUM].x + it->bot[BOT_NUM].y * 3;
-        if (NumChar[v] != input[it->step])
-            return 0;
-        it->step++;
-        return 1;
-    }
-    if (d == GAP)
-        return 0;
-    it->bot[i] = next_coord(it->bot[i], d);
-    if (it->bot[i].x < 0 || it->bot[i].x >= 3 || it->bot[i].y < 0)
-        return 0;
-    if (i == BOT_NUM && it->bot[i].y >= 4)
-        return 0;
-    if (i < BOT_NUM && it->bot[i].y >= 2)
-        return 0;
-    if (i == BOT_NUM && it->bot[BOT_NUM].x + it->bot[BOT_NUM].y * 3 == N_G)
-        return 0;
-    if (i < BOT_NUM && it->bot[i].x + it->bot[i].y * 3 == GAP)
-        return 0;
-    return 1;
-}
-
-struct circ {
-    struct item *data;
-    size_t capacity;
-    size_t start;
-    size_t len;
-};
-
-void add(struct circ *c, struct item v) {
-    if (c->len >= c->capacity) {
-        size_t old_capacity = c->capacity;
-        if (c->capacity)
-            c->capacity *= 2;
-        else
-            c->capacity = 256;
-        void *ptr = realloc(c->data, c->capacity * sizeof(*c->data));
-        if (ptr == NULL) {
-            perror("not enough memory...");
-            free(c->data);
-            exit(EXIT_FAILURE);
-        }
-        c->data = ptr;
-        if (c->start + c->len > old_capacity) {
-            memcpy(c->data + old_capacity, c->data, sizeof(struct item) * (c->start + c->len - old_capacity));
-        }
-    }
-    size_t pos = c->start + c->len;
-    if (pos >= c->capacity)
-        pos -= c->capacity;
-    c->data[pos] = v;
-    c->len++;
-}
-
-struct item get(struct circ *c) {
-    struct item v = c->data[c->start++];
-    if (c->start >= c->capacity)
-        c->start = 0;
-    c->len--;
-    return v;
-}
-
-int empty(struct circ *c) {
-    return c->len == 0;
-}
-
-size_t key(struct item v) {
-    size_t k = 0;
-    for (int i = 0; i < BOT_NUM; i++) {
-        k = k * 6 + v.bot[i].x + v.bot[i].y * 3;
-    }
-    k = k * 12 + v.bot[BOT_NUM].x + v.bot[BOT_NUM].y * 3;
-    k = k * 4 + v.step;
-    return k;
-}
-
-unsigned bfs(char input[4]) {
-    size_t s = 4 * 12;
-    for (int i = 0; i < BOT_NUM; i++)
-        s *= 6;
-    char *visited = calloc(s, 1);
-    struct circ fifo = {0};
-
-    unsigned ret = 0;
-
-    struct item start = {0};
-    for (int i = 0; i < BOT_NUM; i++)
-        start.bot[i] = (struct XY){.x = 2, .y = 0};
-    start.bot[BOT_NUM] = (struct XY){.x = 2, .y = 3};
-
-    add(&fifo, start);
-
-    while (!empty(&fifo)) {
-        struct item v = get(&fifo);
-        if (v.step == 4) {
-            ret = v.cost;
-            break;
-        }
-        if (visited[key(v)])
-            continue;
-        visited[key(v)] = 1;
-        for (int i = 0; i < 5; i++) {
-            struct item tmp = v;
-            if (next(&tmp, (int[5]){UP, DOWN, LEFT, RIGHT, D_A}[i], input)) {
-                add(&fifo, tmp);
-            }
-        }
-    }
-
-    free(fifo.data);
-    free(visited);
-    return ret;
+long min_path(int gap, int sx, int sy, int ex, int ey, long cost[128][128]) {
+    long min = LONG_MAX;
+    enumerate_path(0, 'A', gap, sx, sy, ex, ey, cost, &min);
+    return min;
 }
 
 int main(void) {
@@ -192,12 +38,53 @@ int main(void) {
         input[i][4] = 0;
     }
 
-    unsigned count1 = 0;
-    for (int i = 0; i < 5; i++) {
-        count1 += bfs(input[i]) * strtol(input[i], NULL, 10);
+    long cost[BOT_NUM + 1][128][128];
+    memset(cost, 0xff, sizeof(cost));
+    for (int i = 0; i < 128; i++) {
+        for (int j = 0; j < 128; j++)
+            cost[0][i][j] = 1;
+        for (int j = 0; j <= BOT_NUM; j++)
+            cost[j][i][i] = 1;
     }
 
+    for (int d = 1; d <= 25; d++) {
+        for (int i = 1; i < 6; i++) {
+            for (int j = 1; j < 6; j++) {
+                if (i == j)
+                    continue;
+                long min = min_path(0, i % 3, i / 3, j % 3, j / 3, cost[d - 1]);
+                cost[d][dirpad[i / 3][i % 3]][dirpad[j / 3][j % 3]] = min;
+            }
+        }
+    }
+    
+    unsigned count1 = 0;
+    for (int i = 0; i < 5; i++) {
+        int p = poskey['A'];
+        long c = 0;
+        for (int j = 0; j < 4; j++) {
+            int n = poskey[input[i][j]];
+            c += min_path(9, p % 3, p / 3, n % 3, n / 3, cost[2]);
+            p = n;
+        }
+        count1 += c * strtol(input[i], NULL, 10);
+        printf("%s: %ld\n", input[i], c);
+    }
     printf("%u\n", count1);
+
+    long count2 = 0;
+    for (int i = 0; i < 5; i++) {
+        int p = poskey['A'];
+        long c = 0;
+        for (int j = 0; j < 4; j++) {
+            int n = poskey[input[i][j]];
+            c += min_path(9, p % 3, p / 3, n % 3, n / 3, cost[BOT_NUM]);
+            p = n;
+        }
+        count2 += c * strtol(input[i], NULL, 10);
+        printf("%s: %ld\n", input[i], c);
+    }
+    printf("%ld\n", count2);
 
     return 0;
 }
