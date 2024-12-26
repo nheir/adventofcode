@@ -68,6 +68,10 @@ long sv_read_int(struct sv sv) {
     return ret;
 }
 
+int sv_equal(struct sv a, struct sv b) {
+    return a.len == b.len && memcmp(a.data, b.data, b.len) == 0;
+}
+
 int sv_startswith(struct sv sv, struct sv pref) {
     return sv.len >= pref.len && memcmp(sv.data, pref.data, pref.len) == 0;
 }

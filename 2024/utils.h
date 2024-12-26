@@ -8,7 +8,7 @@
         T *data;                                                                                                       \
         size_t len;                                                                                                    \
         size_t capacity;                                                                                               \
-    } name = {0};
+    } name = {0}
 
 #define DA_APPEND(name, T, value)                                                                                      \
     do {                                                                                                               \
@@ -27,7 +27,7 @@
         }                                                                                                              \
         name.data[name.len] = value;                                                                                   \
         name.len++;                                                                                                    \
-    } while (0);
+    } while (0)
 
 #define DA_EXTEND(name, T, value, size)                                                                                \
     do {                                                                                                               \
@@ -47,14 +47,14 @@
         }                                                                                                              \
         memcpy(name.data + name.len, &value, sizeof(T) * (size));                                                      \
         name.len += (size);                                                                                            \
-    } while (0);
+    } while (0)
 
 #define DA_DESTROY(name)                                                                                               \
     do {                                                                                                               \
         free(name.data);                                                                                               \
         name.data = 0;                                                                                                 \
         name.len = name.capacity = 0;                                                                                  \
-    } while (0);
+    } while (0)
 
 #define LIT2SV(lit) ((struct sv){.data = (unsigned char *)(lit), .len = sizeof(lit) - 1})
 
@@ -81,6 +81,7 @@ struct sv sv_read_input();
 
 long sv_read_int(struct sv sv);
 int sv_startswith(struct sv sv, struct sv pref);
+int sv_equal(struct sv a, struct sv b);
 
 struct pair split(struct sv sv, char byte);
 struct pair sv_split_byte(struct sv sv, char byte);
